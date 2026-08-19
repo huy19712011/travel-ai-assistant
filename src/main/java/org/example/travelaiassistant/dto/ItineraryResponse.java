@@ -11,4 +11,5 @@ public class ItineraryResponse {
 
     private String destination;
     private List<ItineraryDay> itinerary;
+    private String summary;
 }

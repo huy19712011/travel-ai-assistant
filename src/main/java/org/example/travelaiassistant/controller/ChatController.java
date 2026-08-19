@@ -30,7 +30,9 @@ public class ChatController {
     @PostMapping("/itinerary")
     public ItineraryResponse generateItinerary(@RequestBody ItineraryRequest itineraryRequest) {
 
-        return itineraryService.prepareItinerary(itineraryRequest);
+        ItineraryResponse draftItinerary = itineraryService.prepareItinerary(itineraryRequest); // 1st response
+
+        return itineraryService.improveItinerary(draftItinerary); // 2nd response
     }
 
 }
