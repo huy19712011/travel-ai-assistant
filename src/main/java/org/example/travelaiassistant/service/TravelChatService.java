@@ -10,6 +10,8 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -20,25 +22,12 @@ public class TravelChatService {
 
     private final ChatClient chatClient;
 
-    private final String SYSTEM_PROMPT = """
-            You are a travel assistant.
-            
-            Your responsibilities include:
-                - Help users plan trips and vacations.
-                - Keep responses friendly and concise.
-            
-            When creating itineraries:
-                - Recommend exactly {attractionsPerDay} attractions per day.
-                - Recommend {foodsPerDay} local food for each day.
-                - Keep each day's description under {maxWords} words.
-            """;
+    @Value("classpath:prompts/travel-system-prompt.st")
+    private Resource systemPromptTemplate;
 
     public ChatResponse chat(ChatRequest chatRequest) {
 
-        PromptTemplate promptTemplate = PromptTemplate
-                .builder()
-                .template(SYSTEM_PROMPT)
-                .build();
+        PromptTemplate promptTemplate = new PromptTemplate(systemPromptTemplate);
 
         Message systemMessage = promptTemplate.createMessage(
                 Map.of(
