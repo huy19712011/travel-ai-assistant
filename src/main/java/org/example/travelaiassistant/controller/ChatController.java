@@ -5,6 +5,7 @@ import org.example.travelaiassistant.dto.ChatRequest;
 import org.example.travelaiassistant.dto.ChatResponse;
 import org.example.travelaiassistant.dto.ItineraryRequest;
 import org.example.travelaiassistant.dto.ItineraryResponse;
+import org.example.travelaiassistant.service.ItineraryService;
 import org.example.travelaiassistant.service.TravelChatService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -1,4 +1,4 @@
-package org.example.travelaiassistant.controller;
+package org.example.travelaiassistant.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.travelaiassistant.dto.ItineraryRequest;
