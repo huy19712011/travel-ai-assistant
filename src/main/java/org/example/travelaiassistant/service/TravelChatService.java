@@ -5,10 +5,14 @@ import org.example.travelaiassistant.dto.ChatRequest;
 import org.example.travelaiassistant.dto.ChatResponse;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,34 +28,29 @@ public class TravelChatService {
                 - Keep responses friendly and concise.
             
             When creating itineraries:
-                - Recommend exactly 2 attractions per day.
-                - Recommend 1 local food for each day.
-                - Keep each day's description under 50 words.
+                - Recommend exactly {attractionsPerDay} attractions per day.
+                - Recommend {foodsPerDay} local food for each day.
+                - Keep each day's description under {maxWords} words.
             """;
 
     public ChatResponse chat(ChatRequest chatRequest) {
 
+        PromptTemplate promptTemplate = PromptTemplate
+                .builder()
+                .template(SYSTEM_PROMPT)
+                .build();
+
+        Message systemMessage = promptTemplate.createMessage(
+                Map.of(
+                        "attractionsPerDay", 2,
+                        "foodsPerDay", 2,
+                        "maxWords", 50
+                )
+        );
 
         Prompt prompt = new Prompt(
-                new SystemMessage(SYSTEM_PROMPT),
-                new UserMessage("Show me a 2-day itinerary to Hanoi City"),
-                new AssistantMessage("""
-                        Day 1
-                        Attractions:
-                        - Place 1
-                        - Place 2
-                        Food:
-                        - Food 1
-                        
-                        Day 2
-                        Attractions:
-                        - Place 1
-                        - Place 2
-                        Food:
-                        - Food 2
-                        
-                        
-                        """)
+                systemMessage,
+                new UserMessage(chatRequest.getMessage())
         );
 
         String aiResponse = chatClient
