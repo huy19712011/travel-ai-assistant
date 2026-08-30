@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.travelaiassistant.dto.ChatRequest;
 import org.example.travelaiassistant.dto.ChatResponse;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -25,6 +27,8 @@ public class TravelChatService {
     @Value("classpath:prompts/travel-system-prompt.st")
     private Resource systemPromptTemplate;
 
+    private final ChatMemory chatMemory;
+
     public ChatResponse chat(ChatRequest chatRequest) {
 
         PromptTemplate promptTemplate = new PromptTemplate(systemPromptTemplate);
@@ -44,6 +48,9 @@ public class TravelChatService {
 
         String aiResponse = chatClient
                 .prompt(prompt)
+                .advisors(advisorSpec ->
+                        advisorSpec.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                                .param(ChatMemory.CONVERSATION_ID, "1234"))
                 .call()
                 .content();
 
