@@ -17,6 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -46,14 +47,16 @@ public class TravelChatService {
                 new UserMessage(chatRequest.getMessage())
         );
 
+        String conversationId = chatRequest.getConversationId() == null ? UUID.randomUUID().toString() : chatRequest.getConversationId();
+
         String aiResponse = chatClient
                 .prompt(prompt)
                 .advisors(advisorSpec ->
                         advisorSpec.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-                                .param(ChatMemory.CONVERSATION_ID, "1234"))
+                                .param(ChatMemory.CONVERSATION_ID, conversationId))
                 .call()
                 .content();
 
-        return new ChatResponse(aiResponse);
+        return new ChatResponse(conversationId, aiResponse);
     }
 }

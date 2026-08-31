@@ -39,9 +39,9 @@ public class ChatController {
     }
 
     @GetMapping("/memory")
-    public List<Message> fetchMemory() {
+    public List<Message> fetchMemory(@RequestParam String conversationId) {
 
-        return chatMemory.get("1234");
+        return chatMemory.get(conversationId);
     }
 
 }
