@@ -3,6 +3,7 @@ package org.example.travelaiassistant.service;
 import lombok.RequiredArgsConstructor;
 import org.example.travelaiassistant.dto.ChatRequest;
 import org.example.travelaiassistant.dto.ChatResponse;
+import org.example.travelaiassistant.tools.WeatherTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -30,6 +31,8 @@ public class TravelChatService {
 
     private final ChatMemory chatMemory;
 
+    private final WeatherTools weatherTools;
+
     public ChatResponse chat(ChatRequest chatRequest) {
 
         PromptTemplate promptTemplate = new PromptTemplate(systemPromptTemplate);
@@ -54,6 +57,7 @@ public class TravelChatService {
                 .advisors(advisorSpec ->
                         advisorSpec.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                                 .param(ChatMemory.CONVERSATION_ID, conversationId))
+                .tools(weatherTools)
                 .call()
                 .content();
 
