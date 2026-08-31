@@ -3,6 +3,7 @@ package org.example.travelaiassistant.tools;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.travelaiassistant.model.ForecastResponse;
+import org.example.travelaiassistant.model.WeatherResult;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,7 +21,7 @@ public class WeatherTools {
     private String apiKey;
 
     @Tool(description = "Get weather forecast for a given city and date (yyyy-MM-dd)")
-    public String getWeather(String city, String date) {
+    public WeatherResult getWeather(String city, String date) {
 
         try {
             log.info("Fetching weather for {} on {}", city, date);
@@ -33,7 +34,7 @@ public class WeatherTools {
 
             ForecastResponse response = restTemplate.getForObject(url, ForecastResponse.class);
             if (response == null) {
-                return "No response from Weather API.";
+                return new WeatherResult(city, date, "N/A", "No data");
             }
 
             ForecastResponse.ForecastDay forecast =
@@ -42,12 +43,12 @@ public class WeatherTools {
             String condition = forecast.getDay().getCondition().getText();
             double temperature = forecast.getDay().getAvgtemp_c();
 
-            return String.format(
-                    "Weather in %s on %s:  %.1f°C, %s", city, date, temperature, condition
-            );
+            return new WeatherResult(city, date, temperature + " °C", condition);
+
         } catch (Exception e) {
+
             log.error("Error fetching weather for {} on {}: {}", city, date, e.getMessage(), e);
-            return  "Unable to fetch weather information.";
+            return new WeatherResult(city, date, "N/A", "No data");
         }
     }
 }
