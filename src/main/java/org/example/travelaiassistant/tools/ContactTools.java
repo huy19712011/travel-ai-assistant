@@ -30,4 +30,17 @@ public class ContactTools {
 
         return jdbcTemplate.query(sql, rowMapper, city);
     }
+
+    @Tool(description = "Formats a list of contacts into CSV with headers: Name, Email, City")
+    public String formatAsCsv(List<Contact> contacts) {
+
+        StringBuilder builder = new StringBuilder("Name,Email,City\n");
+        for (Contact c : contacts) {
+            builder.append(c.name()).append(",")
+                    .append(c.email()).append(",")
+                    .append(c.city()).append("\n");
+        }
+
+        return builder.toString();
+    }
 }
