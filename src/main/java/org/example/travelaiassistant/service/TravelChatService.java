@@ -7,6 +7,7 @@ import org.example.travelaiassistant.tools.ContactTools;
 import org.example.travelaiassistant.tools.WeatherTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -14,6 +15,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,8 @@ public class TravelChatService {
     private final WeatherTools weatherTools;
 
     private final ContactTools contactTools;
+
+    private final VectorStore vectorStore;
 
     public ChatResponse chat(ChatRequest chatRequest) {
 
@@ -60,6 +64,7 @@ public class TravelChatService {
                 .advisors(advisorSpec ->
                         advisorSpec.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                                 .param(ChatMemory.CONVERSATION_ID, conversationId))
+                .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
                 .tools(weatherTools, contactTools)
                 .call()
                 .content();
