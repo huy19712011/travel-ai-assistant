@@ -13,6 +13,8 @@ public class DocumentIndexingServiceTest {
     @Test
     void  shouldIndexDocuments() throws Exception {
 
+        documentIndexingService.deleteAllDocuments();
+
         documentIndexingService.indexDocuments();
     }
 }
