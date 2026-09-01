@@ -1,6 +1,7 @@
 package org.example.travelaiassistant.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.travelaiassistant.advisors.TravelRAGAdvisor;
 import org.example.travelaiassistant.dto.ChatRequest;
 import org.example.travelaiassistant.dto.ChatResponse;
 import org.example.travelaiassistant.tools.ContactTools;
@@ -40,6 +41,8 @@ public class TravelChatService {
 
     private final VectorStore vectorStore;
 
+    private final TravelRAGAdvisor travelRAGAdvisor;
+
     public ChatResponse chat(ChatRequest chatRequest) {
 
         PromptTemplate promptTemplate = new PromptTemplate(systemPromptTemplate);
@@ -64,7 +67,7 @@ public class TravelChatService {
                 .advisors(advisorSpec ->
                         advisorSpec.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                                 .param(ChatMemory.CONVERSATION_ID, conversationId))
-                .advisors(QuestionAnswerAdvisor.builder(vectorStore).build())
+                .advisors(travelRAGAdvisor)
                 .tools(weatherTools, contactTools)
                 .call()
                 .content();
