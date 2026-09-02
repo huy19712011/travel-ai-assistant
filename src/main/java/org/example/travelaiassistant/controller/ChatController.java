@@ -9,7 +9,9 @@ import org.example.travelaiassistant.service.ItineraryService;
 import org.example.travelaiassistant.service.TravelChatService;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -23,6 +25,12 @@ public class ChatController {
     private final ItineraryService itineraryService;
 
     private final ChatMemory chatMemory;
+
+    @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<String> stream(@RequestBody ChatRequest request) {
+        return travelChatService.stream(request);
+    }
+
 
     @PostMapping("/chat")
     public ChatResponse chat(@RequestBody ChatRequest chatRequest) {

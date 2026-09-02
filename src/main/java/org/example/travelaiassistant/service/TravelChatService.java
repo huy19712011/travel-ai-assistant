@@ -20,6 +20,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +43,12 @@ public class TravelChatService {
     private final VectorStore vectorStore;
 
     private final TravelRAGAdvisor travelRAGAdvisor;
+
+    public Flux<String> stream(ChatRequest chatRequest) {
+        return chatClient.prompt().user(chatRequest.getMessage())
+                .stream()
+                .content();
+    }
 
     public ChatResponse chat(ChatRequest chatRequest) {
 
