@@ -63,4 +63,19 @@ public class AudioController {
                 .header("Content-Type", "audio/mpeg")
                 .body(audio);
     }
+
+    @PostMapping("/voice-assistant")
+    public ResponseEntity<byte[]> voiceChat(@RequestParam("file") MultipartFile file) {
+        AudioUploadResponse uploadResponse = audioService.store(file);
+        String transcript = audioService.speechToText(uploadResponse.getStoredFilename());
+        ChatResponse chatResponse = travelChatService.chat(ChatRequest.builder()
+                .message(transcript)
+                .build());
+        byte[] audioResponse = audioService.textToSpeech(chatResponse.getResponse());
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "audio/mpeg")
+                .header("X-Transcript", transcript)
+                .body(audioResponse);
+    }
 }
