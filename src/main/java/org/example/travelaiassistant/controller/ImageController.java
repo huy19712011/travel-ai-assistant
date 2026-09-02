@@ -5,6 +5,7 @@ import org.example.travelaiassistant.dto.ChatRequest;
 import org.example.travelaiassistant.dto.ChatResponse;
 import org.example.travelaiassistant.service.ImageGenerationService;
 import org.example.travelaiassistant.service.ImageUnderstandingService;
+import org.example.travelaiassistant.service.StabilityImageGenerationService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,15 @@ public class ImageController {
 
     private final ImageUnderstandingService imageUnderstandingService;
     private final ImageGenerationService imageGenerationService;
+    private final StabilityImageGenerationService stabilityImageGenerationService;
+
+    @GetMapping("/generate/stability")
+    public ResponseEntity<byte[]> generateImageWithStability(@RequestParam String message) {
+
+        byte[] imageBytes = stabilityImageGenerationService.generate(message);
+
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(imageBytes);
+    }
 
     @GetMapping("/generate")
     public ResponseEntity<byte[]> generateImage(@RequestParam String message) {
