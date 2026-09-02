@@ -2,6 +2,7 @@ package org.example.travelaiassistant.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.travelaiassistant.dto.AudioUploadResponse;
+import org.example.travelaiassistant.dto.ChatResponse;
 import org.example.travelaiassistant.service.AudioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class AudioController {
 
     private final AudioService audioService;
+
+    @PostMapping("/to-text")
+    public ResponseEntity<ChatResponse> toText(@RequestParam("file") MultipartFile file) {
+        AudioUploadResponse uploadResponse = audioService.store(file);
+        String text = audioService.speechToText(uploadResponse.getStoredFilename());
+        return ResponseEntity.ok(new ChatResponse("", text));
+    }
+
 
     @PostMapping("/upload")
     public ResponseEntity<AudioUploadResponse> uploadAudio(@RequestParam("file") MultipartFile file) {
