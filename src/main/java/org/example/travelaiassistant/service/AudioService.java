@@ -6,6 +6,10 @@ import org.example.travelaiassistant.dto.AudioUploadResponse;
 import org.springframework.ai.audio.transcription.AudioTranscriptionPrompt;
 import org.springframework.ai.audio.transcription.AudioTranscriptionResponse;
 import org.springframework.ai.audio.transcription.TranscriptionModel;
+import org.springframework.ai.audio.tts.TextToSpeechModel;
+import org.springframework.ai.audio.tts.TextToSpeechPrompt;
+import org.springframework.ai.audio.tts.TextToSpeechResponse;
+import org.springframework.ai.openai.OpenAiAudioSpeechOptions;
 import org.springframework.ai.openai.OpenAiAudioTranscriptionOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -23,6 +27,7 @@ import java.util.UUID;
 public class AudioService {
 
     private final TranscriptionModel transcriptionModel;
+    private final TextToSpeechModel textToSpeechModel;
 
     @Value("${app.audio.upload-dir}")
     private String uploadDir;
@@ -75,5 +80,17 @@ public class AudioService {
 
             throw new RuntimeException(e);
         }
+    }
+
+    public byte[] textToSpeech(String text) {
+
+        // Many options here
+        OpenAiAudioSpeechOptions options = OpenAiAudioSpeechOptions.builder()
+                .voice(OpenAiAudioSpeechOptions.Voice.ONYX)
+                .build();
+
+        TextToSpeechPrompt prompt = new TextToSpeechPrompt(text, options);
+        TextToSpeechResponse response = textToSpeechModel.call(prompt);
+        return response.getResult().getOutput();
     }
 }

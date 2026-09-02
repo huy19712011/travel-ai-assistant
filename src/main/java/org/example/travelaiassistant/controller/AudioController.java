@@ -54,4 +54,13 @@ public class AudioController {
         // 4. return the response
         return new AudioChatResponse(transcript, chatResponse.getResponse());
     }
+
+    @PostMapping("/to-speech")
+    public ResponseEntity<byte[]> textToSpeech(@RequestParam("text") String text) {
+
+        byte[] audio = audioService.textToSpeech(text);
+        return ResponseEntity.ok()
+                .header("Content-Type", "audio/mpeg")
+                .body(audio);
+    }
 }
