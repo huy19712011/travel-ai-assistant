@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Travel Assistant - Voice Chat</title>
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f6f9;
+    margin:40px;
+}
+.container{
+    max-width:800px;
+    margin:auto;
+    background:#fff;
+    padding:24px;
+    border-radius:8px;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+button{
+    padding:10px 18px;
+    margin-right:10px;
+    cursor:pointer;
+}
+textarea{
+    width:100%;
+    height:120px;
+    margin-top:10px;
+    padding:10px;
+    box-sizing:border-box;
+    resize:vertical;
+}
+audio{
+    width:100%;
+    margin-top:15px;
+}
+.status{
+    margin-top:15px;
+    color:#666;
+    font-size:13px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h2>AI Travel Assistant - Voice Chat</h2>
+
+<button id="recordBtn">Start Recording</button>
+<button id="stopBtn" disabled>Stop Recording</button>
+
+<div class="status" id="status">Status: Ready</div>
+
+<h3>Transcript</h3>
+<textarea id="transcript" rows="2" readonly placeholder="Transcript will appear here..."></textarea>
+
+<h3>AI Voice Response</h3>
+<audio id="player" controls></audio>
+
+</div>
+
+<script>
+
+let mediaRecorder;
+let chunks=[];
+
+const recordBtn=document.getElementById("recordBtn");
+const stopBtn=document.getElementById("stopBtn");
+
+recordBtn.onclick=async ()=>{
+    try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error("Your browser does not support audio recording. Please use a modern browser (Chrome, Firefox, Edge) and ensure you are using HTTPS or localhost.");
+        }
+
+        const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+
+        if (!window.MediaRecorder) {
+            throw new Error("Your browser does not support MediaRecorder API.");
+        }
+
+        mediaRecorder=new MediaRecorder(stream);
+
+        chunks=[];
+
+        mediaRecorder.ondataavailable=e=>{
+            chunks.push(e.data);
+        };
+
+        mediaRecorder.onstop=uploadAudio;
+
+        mediaRecorder.start();
+
+        recordBtn.disabled=true;
+        stopBtn.disabled=false;
+
+        document.getElementById("status").textContent="Status: Recording...";
+    } catch (err) {
+        console.error("Error accessing microphone:", err);
+        document.getElementById("status").textContent="Status: Error";
+        alert("Microphone error: " + err.message);
+    }
+};
+
+stopBtn.onclick=()=>{
+
+    mediaRecorder.stop();
+
+    recordBtn.disabled=false;
+    stopBtn.disabled=true;
+
+    document.getElementById("status").textContent="Status: Uploading...";
+};
+
+async function uploadAudio(){
+
+    const audioBlob=new Blob(chunks,{type:"audio/webm"});
+
+    const formData=new FormData();
+
+    formData.append("file",audioBlob,"recording.webm");
+
+    try {
+        const response=await fetch("/api/audio/voice-assistant",{
+            method:"POST",
+            body:formData
+        });
+
+        if(!response.ok){
+            throw new Error(`Server responded with ${response.status}`);
+        }
+
+        const transcript=response.headers.get("X-Transcript");
+
+        document.getElementById("transcript").value=transcript || "";
+
+        const audioBytes=await response.blob();
+
+        const audioUrl=URL.createObjectURL(audioBytes);
+
+        const player=document.getElementById("player");
+
+        player.src=audioUrl;
+
+        player.play();
+
+        document.getElementById("status").textContent="Status: Complete";
+    } catch (err) {
+        console.error("Upload error:", err);
+        document.getElementById("status").textContent="Status: Failed";
+        alert("Upload failed: " + err.message);
+    }
+}
+
+</script>
+
+</body>
+</html>
