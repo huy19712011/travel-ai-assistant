@@ -1,9 +1,12 @@
 package org.example.travelaiassistant.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.travelaiassistant.dto.AudioChatResponse;
 import org.example.travelaiassistant.dto.AudioUploadResponse;
+import org.example.travelaiassistant.dto.ChatRequest;
 import org.example.travelaiassistant.dto.ChatResponse;
 import org.example.travelaiassistant.service.AudioService;
+import org.example.travelaiassistant.service.TravelChatService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +21,8 @@ public class AudioController {
 
     private final AudioService audioService;
 
+    private final TravelChatService travelChatService;
+
     @PostMapping("/to-text")
     public ResponseEntity<ChatResponse> toText(@RequestParam("file") MultipartFile file) {
         AudioUploadResponse uploadResponse = audioService.store(file);
@@ -31,5 +36,22 @@ public class AudioController {
 
         AudioUploadResponse response = audioService.store(file);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/chat")
+    public AudioChatResponse chatWithAudio (@RequestParam("file") MultipartFile file) {
+        // 1. upload file
+        AudioUploadResponse uploadResponse = audioService.store(file);
+
+        // 2. convert audio into text
+        String transcript = audioService.speechToText(uploadResponse.getStoredFilename());
+
+        // 3. send transcript to chat service
+        ChatResponse chatResponse = travelChatService.chat(ChatRequest.builder()
+                .message(transcript)
+                .build());
+
+        // 4. return the response
+        return new AudioChatResponse(transcript, chatResponse.getResponse());
     }
 }
