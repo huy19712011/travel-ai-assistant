@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @RestController
 @RequestMapping("/api/audio")
 @RequiredArgsConstructor
@@ -75,7 +78,8 @@ public class AudioController {
 
         return ResponseEntity.ok()
                 .header("Content-Type", "audio/mpeg")
-                .header("X-Transcript", transcript)
+                .header("X-Transcript", URLEncoder.encode(transcript, StandardCharsets.UTF_8))
+                .header("X-AI-Response", URLEncoder.encode(chatResponse.getResponse(), StandardCharsets.UTF_8))
                 .body(audioResponse);
     }
 }

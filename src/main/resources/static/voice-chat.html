@@ -56,6 +56,9 @@ audio{
 <h3>Transcript</h3>
 <textarea id="transcript" rows="2" readonly placeholder="Transcript will appear here..."></textarea>
 
+<h3>AI Response</h3>
+<textarea id="aiResponse" rows="4" readonly placeholder="AI response will appear here..."></textarea>
+
 <h3>AI Voice Response</h3>
 <audio id="player" controls></audio>
 
@@ -133,8 +136,12 @@ async function uploadAudio(){
         }
 
         const transcript=response.headers.get("X-Transcript");
+        const decodedTranscript=transcript ? decodeURIComponent(transcript.replace(/\+/g, ' ')) : "";
+        document.getElementById("transcript").value=decodedTranscript;
 
-        document.getElementById("transcript").value=transcript || "";
+        const aiResponse=response.headers.get("X-AI-Response");
+        const decodedAiResponse=aiResponse ? decodeURIComponent(aiResponse.replace(/\+/g, ' ')) : "";
+        document.getElementById("aiResponse").value=decodedAiResponse;
 
         const audioBytes=await response.blob();
 
