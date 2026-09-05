@@ -16,6 +16,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -43,6 +44,8 @@ public class TravelChatService {
     private final VectorStore vectorStore;
 
     private final TravelRAGAdvisor travelRAGAdvisor;
+
+    private final ToolCallbackProvider mcpToolProvider;
 
     public Flux<String> stream(ChatRequest chatRequest) {
         return chatClient.prompt().user(chatRequest.getMessage())
@@ -75,7 +78,7 @@ public class TravelChatService {
                         advisorSpec.advisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                                 .param(ChatMemory.CONVERSATION_ID, conversationId))
                 .advisors(travelRAGAdvisor)
-                .tools(weatherTools, contactTools)
+                .tools(weatherTools, contactTools, mcpToolProvider)
                 .call()
                 .content();
 
